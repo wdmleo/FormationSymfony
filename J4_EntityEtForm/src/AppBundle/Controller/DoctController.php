@@ -48,10 +48,29 @@ class DoctController extends Controller
     }
 
     /**
+     * @Route("/supp/{id}", name="doct_supprimer", requirements={"id"="\d+"})
+     */
+    public function supprimerAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+
+        $message = $em->getRepository("AppBundle:Message")->find($id);
+
+        $em->remove($message);
+
+        $em->flush();
+
+        return $this->redirectToRoute('doct_home');
+    }
+
+    /**
      * @Route("/{destinataire}", name="doct_home")
      */
-    public function homeAction(Request $request, $destinataire) {
+    public function homeAction(Request $request, $destinataire = '') {
         $em = $this->getDoctrine()->getManager();
+
+        if ($destinataire == '') {
+            return $this->redirectToRoute('doct_all');
+        }
 
         $repository = $em->getRepository('AppBundle:Message');
         $msgId1 = $repository->find(1);

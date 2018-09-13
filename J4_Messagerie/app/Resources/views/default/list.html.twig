@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <form method="post" action="{{ path('nouveau_message') }}">
+            <div class="form-row">
+                <div class="col-12">
+                    <label>Destinataire</label>
+                    <input type="text" class="form-control" required name="destinataire" />
+                </div>
+                <div class="col-12">
+                    <label>Titre</label>
+                    <input type="text" class="form-control" required name="titre" />
+                </div>
+                <div class="col-12">
+                    <label>Corps</label>
+                    <textarea class="form-control" required name="corps"></textarea>
+                </div>
+                <input type="hidden" value="{{ id }}" name="auteur" />
+                <div class="col-12">
+                    <br>
+                    <input type="submit" class="btn btn-block btn-primary" value="Envoyer !" />
+                </div>
+            </div>
+        </form>
+        <hr>
+        <div class="row">
+            {{ dump(recus) }}
+        </div>
+    </div>
+{% endblock %}
