@@ -6,5 +6,23 @@
     {% if toto is defined %}
     <h1>{{ toto }}</h1>
     {% endif %}
+
+    {% if message is defined and message is not null %}
+    <h3>{{ message.titre }}</h3>
+    <span>{{ message.date | date('d/m/Y') }}</span>
+    <hr>
+    <p>{{ message.message | raw }}</p>
+    <span>{{ message.destinataire }}</span>
+    {% endif %}
+
+    {% if messages is defined %}
+    {% for item in messages %}
+    <h3>{{ item.titre }}</h3>
+    <span>{{ item.date | date('d/m/Y') }}</span>
+    <hr>
+    <p>{{ item.message | raw }}</p>
+    <span>{{ item.destinataire }}</span>
+    {% endfor %}
+    {% endif %}
 </body>
 </html>
