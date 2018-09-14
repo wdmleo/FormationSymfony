@@ -27,7 +27,57 @@
         </form>
         <hr>
         <div class="row">
-            {{ dump(recus) }}
+            {% for item in recus %}
+            <div class="card col-12">
+                <div class="card-title">
+                    {{ item.titre }}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">De {{ item.auteur.nom }} le {{ item.date | date('d/m/Y') }}</h5>
+                    <p class="card-text">{{ item.corps }}</p>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="row justify-content-md-end">
+                    {% set canAnswer = (item.auteur.id != id) %}
+                    {% for children in item.childrens %}
+                    {% set canAnswer = (children.auteur.id != id) %}
+
+                    <div class="card col-9">
+                        <div class="card-title">
+                            {{ children.titre }}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">De {{ children.auteur.nom }} le {{ children.date | date('d/m/Y') }}</h5>
+                            <p class="card-text">{{ children.corps }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% if canAnswer %}
+                    <div class="card col-9">
+                        <div class="card-title">Réponse</div>
+                        <div class="card-body">
+                            <form method="post" action="{{ path('nouveau_message') }}">
+                                <div class="form-row">
+                                    <div class="col-12">
+                                        <label>Corps</label>
+                                        <textarea class="form-control" required name="corps"></textarea>
+                                    </div>
+                                    <input type="hidden" value="{{ id }}" name="auteur" />
+                                    <input type="hidden" value="{{ item.id }}" name="parent_id" />
+                                    <input type="hidden" value="{{ item.auteur.id }}" name="destinataire" />
+                                    <div class="col-12">
+                                        <br>
+                                        <input type="submit" class="btn btn-block btn-primary" value="Envoyer !" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

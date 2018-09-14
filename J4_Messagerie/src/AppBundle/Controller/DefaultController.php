@@ -52,10 +52,17 @@ class DefaultController extends Controller
             // return new Response(',404');
         }
 
-        $recus = $em->getRepository('AppBundle:Message')->findByDestinataire($id);
+        $recus = $em->getRepository('AppBundle:Message')->findBy([
+            'destinataire'=>$id,
+            'parent'=>null
+        ]);
+        $envoye = $em->getRepository("AppBundle:Message")->findBy([
+            'auteur'=>$id,
+            'parent'=>null
+        ]);
 
         return $this->render('default/list.html.twig', [
-            'recus'=>$recus,
+            'recus'=>array_merge($recus, $envoye),
             'id'=>$id
         ]);
     }
@@ -70,8 +77,22 @@ class DefaultController extends Controller
         $titre = $request->request->get('titre');
         $corps = $request->request->get('corps');
         $auteur = $request->request->get('auteur');
+        $parentId = $request->request->get('parent_id');
 
-        $destinataireUtilisateur = $em->getRepository("AppBundle:Utilisateur")->findOneByNom($destinataire);
+        $parent = null;
+        $destinataireUtilisateur = null;
+
+        if ($parentId != null) {
+            $parent = $em->getRepository("AppBundle:Message")->find($parentId);
+            if ($parent != null) {
+                $titre = $parent->getTitre();
+            }
+            $destinataireUtilisateur = $em->getRepository("AppBundle:Utilisateur")->find($destinataire);
+        }
+        else {
+            $destinataireUtilisateur = $em->getRepository("AppBundle:Utilisateur")->findOneByNom($destinataire);
+        }
+
         $auteurUtilisateur = $em->getRepository("AppBundle:Utilisateur")->find($auteur);
 
         if ($destinataireUtilisateur != null && $auteurUtilisateur != null) {
@@ -80,7 +101,8 @@ class DefaultController extends Controller
                     ->setCorps($corps)
                     ->setDestinataire($destinataireUtilisateur)
                     ->setAuteur($auteurUtilisateur)
-                    ->setDate(new \DateTime());
+                    ->setDate(new \DateTime())
+                    ->setParent($parent);
 
             $em->persist($message);
 

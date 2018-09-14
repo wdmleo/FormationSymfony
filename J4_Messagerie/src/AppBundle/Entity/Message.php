@@ -43,9 +43,22 @@ class Message
     private $date;
 
     /**
+     * @var Message
+     *
+     * @ORM\ManyToOne(targetEntity="Message", inversedBy="childrens")
+     * @ORM\JoinColumn(name="parent", referencedColumnName="id")
+     */
+    private $parent;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Message", mappedBy="parent")
+     */
+    private $childrens;
+
+    /**
      * @var \AppBundle\Entity\Utilisateur
      *
-     * @ORM\ManyToOne(targetEntity="\AppBundle\Entity\Utilisateur", inverseBy="messagesRecu")
+     * @ORM\ManyToOne(targetEntity="\AppBundle\Entity\Utilisateur", inversedBy="messagesRecu")
      * @ORM\JoinColumn(name="destinataire", referencedColumnName="id")
      */
     private $destinataire;
@@ -186,5 +199,70 @@ class Message
     public function getAuteur()
     {
         return $this->auteur;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->childrens = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Set parent
+     *
+     * @param \AppBundle\Entity\Message $parent
+     *
+     * @return Message
+     */
+    public function setParent(\AppBundle\Entity\Message $parent = null)
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * Get parent
+     *
+     * @return \AppBundle\Entity\Message
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Add children
+     *
+     * @param \AppBundle\Entity\Message $children
+     *
+     * @return Message
+     */
+    public function addChildren(\AppBundle\Entity\Message $children)
+    {
+        $this->childrens[] = $children;
+
+        return $this;
+    }
+
+    /**
+     * Remove children
+     *
+     * @param \AppBundle\Entity\Message $children
+     */
+    public function removeChildren(\AppBundle\Entity\Message $children)
+    {
+        $this->childrens->removeElement($children);
+    }
+
+    /**
+     * Get childrens
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getChildrens()
+    {
+        return $this->childrens;
     }
 }
