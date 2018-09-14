@@ -14,7 +14,34 @@ class DefaultController extends Controller
      * @Route("", name="home")
      */
     public function homeAction(Request $request) {
-        return $this->render('default/home.html.twig');
+
+        $utilisateur = new \AppBundle\Entity\Utilisateur();
+
+        $form = $this->createFormBuilder($utilisateur)
+                     ->add('nom', TextType::class)
+                     ->add('validation', SubmitType::class, ['label'=>'Se connecter'])
+                     ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $utilisateur = $form->getData();
+
+            $existingUser = $em->getRepository("AppBundle:Utilisateur")->findOneByNom($utilisateur->getNom());
+            if ($existingUser) {
+                $utilisateur = $existingUser;
+            }
+            else {
+                $em->persist($utilisateur);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('list', ['id'=>$utilisateur->getId()]);
+        }
+
+        return $this->render('default/home.html.twig', [
+            'form'=>$form->createView();
+        ]);
     }
 
     /**
@@ -61,9 +88,33 @@ class DefaultController extends Controller
             'parent'=>null
         ]);
 
+        $message = new \AppBundle\Entity\Message();
+
+        $form = $this->createFormBuilder($message)
+                     ->add('destinataire_nom', TextType::class)
+                     ->add('titre', TextType::class)
+                     ->add('corps', TextareaType::class)
+                     ->add('validation', SubmitType::class, ['label'=>'Envoyer !'])
+                     ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $message = $form->getData();
+            $destinataire = $form->getData()['destinataire_nom'];
+
+            //
+            $destinataireUtilisateur = $em->getRepository("AppBundle:Utilisateur")->findOneByNom($destinataire);
+            $message->setDestinataire($destinataireUtilisateur);
+
+            $em->persist($message);
+            $em->flush();
+        }
+
         return $this->render('default/list.html.twig', [
             'recus'=>array_merge($recus, $envoye),
-            'id'=>$id
+            'id'=>$id,
+            'form'=>$form
         ]);
     }
 
