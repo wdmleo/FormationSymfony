@@ -27,7 +27,22 @@ class ClientController extends Controller
              $data[] = $item->toArray();
          }
 
-         return new JsonResponse($data);
+         return new JsonResponse($data, (array_length($data) == 0 ? 204 : 200));
+     }
+
+     /*
+      * @Rest\Get("/{min}/{max}", requirements={"min"="\d+", "max"="\d+"})
+      */
+
+     /**
+      * @Rest\Get("/{id}", requirements={"id"="\d+"})
+      */
+     public function getClientAction(Request $request, $id) {
+         $em = $this->getDoctrine()->getManager();
+
+         $client = $em->getRepository("AppBundle:Client")->find($id);
+
+         return new JsonResponse($client->toArray());
      }
 
     /**
@@ -58,14 +73,39 @@ class ClientController extends Controller
     /**
      * @Rest\Put("")
      */
-    public function modifyClientAction(Request $request) {
+    public function putClientAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
 
+        $data = (object)json_decode($request->getContent(), true);
+
+        $client = $em->getRepository("AppBundle:Client")->find($data->id);
+        $client->setFirstname($data->firstname);
+        $client->setLastname($data->lastname);
+        $client->setAddressNumber($data->address_number);
+        $client->setAddress($data->address);
+        $client->setPostalCode($data->postal_code);
+        $client->setEmail($data->email);
+        $client->setCity($data->city);
+        $client->setPhone($data->phone);
+        $client->setBirthday(\DateTime::createFromFormat('d/m/Y', $data->birthday));
+
+        $em->flush();
+
+        return new JsonResponse($client->toArray(), 200);
     }
 
     /**
-     * @Rest\Delete("/{id}")
+     * @Rest\Delete("/{id}", requirements={"id"="\d+"})
      */
     public function deleteClientAction(Request $request, $id) {
-        
+        $em = $this->getDoctrine()->getManager();
+
+        $client = $em->getRepository("AppBundle:Client")->find($id);
+
+        $em->remove($client);
+
+        $em->flush();
+
+        return new JsonResponse(['id'=>$id], 200);
     }
 }
